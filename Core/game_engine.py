@@ -5,23 +5,34 @@ class GameEngine:
         self.currIdx = 0
 
     def play(self):
-        while True:
+        self.board.printBoard()
+
+        while not self.board.isFull():
             player = self.players[self.currIdx]
             print(f"\n{player.name}'s turn ({player.symbol})")
-            self.board.printBoard()
 
-            x, y = player.getMove(self.board)
+            try:
+                x, y = player.getMove(self.board)
 
-            if self.board.playMove(x, y, player.symbol):
+                if not self.board.validMove(x, y):
+                    print("Invalid move. Try again.")
+                    continue
+
+                self.board.playMove(x, y, player.symbol)
+                self.board.printBoard()
+
                 if self.board.winCheck(x, y, player.symbol):
-                    self.board.printBoard()
-                    print(f"\n{player.name} wins!")
-                    player.addWin()
-                    break
-                elif self.board.isFull():
-                    self.board.printBoard()
-                    print("\nIt's a draw!")
-                    break
+                    print(f"\n{player.name} ({player.symbol}) wins!")
+                    return
+
                 self.currIdx = 1 - self.currIdx
-            else:
-                print("Invalid move. Try again.")
+
+            except (ValueError, TypeError):
+                print("Invalid input format. Please enter two integers (row col).")
+                continue
+
+            except KeyboardInterrupt:
+                print("\nGame interrupted.")
+                return
+
+        print("\nIt's a draw!")

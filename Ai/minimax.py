@@ -1,95 +1,94 @@
+import copy
+import math
+import random
+from typing import List, Tuple, Optional
+
+
 class MiniMax:
-    def __init__(self, playerOne: str = 'X', playerTwo: str = 'O', maxDepth: int = 5):
-        self.playerOne = playerOne  # Maximizing player
-        self.playerTwo = playerTwo  # Minimizing player
+    def __init__(self, playerOne: str = 'X', playerTwo: str = 'O', maxDepth: int = 3):
+        self.playerOne = playerOne
+        self.playerTwo = playerTwo
         self.maxDepth = maxDepth
 
         # Pattern weights for evaluation
         self.pattern_weights = {
-            # Live patterns (open on both ends)
             "LIVE_TWO": 10,
             "LIVE_THREE": 100,
             "LIVE_FOUR": 1000,
-            # Dead patterns (blocked on one end)
-            "DEAD_TWO": 5,
-            "DEAD_THREE": 25,
+            "DEAD_TWO": 1,
+            "DEAD_THREE": 10,
             "DEAD_FOUR": 100,
-            # Win
             "FIVE": 100000
         }
 
-    def is_game_over(self, board):
-        """Check if the game is over (win or draw)"""
-        # Check for a winner
-        winner = board.hasWinner()
-        if winner:
-            return winner  # Return the winning player
-
-        # Check if the board is full (draw)
-        if board.isFull():
-            return "Draw"
-
-        return None  # Game is not over
-
-    def FindBestMove(self, board, player):
-        """Find the best move for the given player"""
+    def FindBestMove(self, board, player) -> Tuple[int, int]:
+        """Find the best move for the given player with fallback to random move"""
         best_move = None
-        best_score = float('-inf') if player == self.playerOne else float('inf')
+        best_score = -math.inf if player == self.playerOne else math.inf
 
-        for move in self.get_relevant_moves(board):
+        # Get all possible moves (with optimization)
+        possible_moves = self.get_relevant_moves(board)
+        if not possible_moves:
+            return self.get_random_move(board)
+
+        for move in possible_moves:
             x, y = move
+            if not board.validMove(x, y):
+                continue
+
+            # Make the move
+            temp_board = copy.deepcopy(board)
+            temp_board.playMove(x, y, player)
+
+            # Evaluate
             if player == self.playerOne:
-                # Maximizing player
-                board[x][y] = player
-                score = self.minimax(board, self.maxDepth - 1, False)
-                board[x][y] = '.'
+                score = self.minimax(temp_board, self.maxDepth - 1, False)
                 if score > best_score:
                     best_score = score
                     best_move = move
             else:
-                # Minimizing player
-                board[x][y] = player
-                score = self.minimax(board, self.maxDepth - 1, True)
-                board[x][y] = '.'
+                score = self.minimax(temp_board, self.maxDepth - 1, True)
                 if score < best_score:
                     best_score = score
                     best_move = move
 
-        return best_move
+            # Undo the move
+            #board.playMove(x, y, '.')
 
-    def get_relevant_moves(self, board):
-        """Get moves that are adjacent to existing pieces (plus a small buffer)"""
-        if board.isEmpty():
-            # First move should be near the center for Gomoku
-            center = board.l // 2
-            return [(center, center)]
+        return best_move if best_move else self.get_random_move(board)
 
-        relevant_moves = set()
-        buffer = 2  # Consider cells within 2 spaces of existing pieces
-
+    def get_random_move(self, board):
+        """Fallback to random valid move"""
+        valid_moves = []
         for i in range(board.l):
             for j in range(board.l):
-                if board.grid[i][j] != '.':  # If cell is occupied
-                    # Add nearby empty cells to relevant moves
-                    for di in range(-buffer, buffer + 1):
-                        for dj in range(-buffer, buffer + 1):
+                if board.grid[i][j] == '.':
+                    valid_moves.append((i, j))
+        return random.choice(valid_moves) if valid_moves else (0, 0)
+
+    def get_relevant_moves(self, board):
+        """Get moves near existing pieces for efficiency"""
+        moves = set()
+        for i in range(board.l):
+            for j in range(board.l):
+                if board.grid[i][j] != '.':
+                    for di in [-1, 0, 1]:
+                        for dj in [-1, 0, 1]:
                             ni, nj = i + di, j + dj
                             if (0 <= ni < board.l and 0 <= nj < board.l and
                                     board.grid[ni][nj] == '.'):
-                                relevant_moves.add((ni, nj))
-
-        return list(relevant_moves) if relevant_moves else board.possibleMoves()
+                                moves.add((ni, nj))
+        return list(moves) if moves else board.possibleMoves()
 
     def minimax(self, board, depth, is_maximizing):
         # Check terminal conditions
-        game_status = self.is_game_over(board)
-
-        if game_status == self.playerOne:
-            return 10000 + depth  # Win for maximizing player (higher score for quicker wins)
-        elif game_status == self.playerTwo:
-            return -10000 - depth  # Win for minimizing player (lower score for quicker losses)
-        elif game_status == "Draw":
-            return 0  # Draw
+        winner = board.hasWinner()
+        if winner == self.playerOne:
+            return 100000 + depth
+        elif winner == self.playerTwo:
+            return -100000 - depth
+        elif board.isFull():
+            return 0
 
         if depth == 0:
             return self.evaluate_board(board)
@@ -97,111 +96,94 @@ class MiniMax:
         moves = self.get_relevant_moves(board)
 
         if is_maximizing:
-            max_eval = float('-inf')
+            max_eval = -math.inf
             for move in moves:
                 x, y = move
-                board.playMove(x, y, self.playerOne)
-                eval_score = self.minimax(board, depth - 1, False)
-                board.grid[x][y] = '.'
-                max_eval = max(max_eval, eval_score)
+                temp_board = copy.deepcopy(board)
+                temp_board.playMove(x, y, self.playerOne)
+                eval = self.minimax(temp_board, depth - 1, False)
+                board.playMove(x, y, '.')
+                max_eval = max(max_eval, eval)
 
             return max_eval
         else:
-            min_eval = float('inf')
+            min_eval = math.inf
             for move in moves:
                 x, y = move
-                board.playMove(x, y, self.playerTwo)
-                eval_score = self.minimax(board, depth - 1, True)
-                board.grid[x][y] = '.'
-                min_eval = min(min_eval, eval_score)
-                beta = min(beta, eval_score)
+                temp_board = copy.deepcopy(board)
+                temp_board.playMove(x, y, self.playerOne)
+                eval = self.minimax(temp_board, depth - 1, True)
+                board.playMove(x, y, '.')
+                min_eval = min(min_eval, eval)
 
             return min_eval
 
     def evaluate_board(self, board):
-        """Evaluate the current board position"""
+        """Improved board evaluation with pattern detection"""
         score = 0
-
-        # Check all directions: horizontal, vertical, diagonal
         directions = [(1, 0), (0, 1), (1, 1), (1, -1)]
 
-        # Evaluate patterns for both players
-        score += self.evaluate_patterns_for_player(board, self.playerOne, directions)
-        score -= self.evaluate_patterns_for_player(board, self.playerTwo, directions)
+        # Evaluate for both players
+        score += self.evaluate_player(board, self.playerOne, directions)
+        score -= self.evaluate_player(board, self.playerTwo, directions)
 
         return score
 
-    def evaluate_patterns_for_player(self, board, player, directions):
-        """Evaluate board patterns for the specified player"""
-        score = 0
-
-        # For each position on the board
+    def evaluate_player(self, board, player, directions):
+        """Evaluate board for specific player"""
+        total = 0
         for i in range(board.l):
             for j in range(board.l):
-                # For each direction
-                for dx, dy in directions:
-                    pattern_info = self.detect_pattern(board, i, j, dx, dy, player)
-                    if pattern_info:
-                        pattern_type, count = pattern_info
-                        score += self.pattern_weights.get(pattern_type, 0)
+                if board.grid[i][j] == player:
+                    for dx, dy in directions:
+                        pattern = self.detect_pattern(board, i, j, dx, dy, player)
+                        if pattern:
+                            total += self.pattern_weights.get(pattern, 0)
+        return total
 
-        return score
-
-    def detect_pattern(self, board, start_x, start_y, dx, dy, player):
-        """
-        Detect patterns starting at (start_x, start_y) in direction (dx, dy)
-        Returns pattern type and count if a pattern is found
-        """
-        if board.grid[start_x][start_y] != player:
+    def detect_pattern(self, board, x, y, dx, dy, player):
+        """Detect and classify patterns"""
+        # Check if this is the start of a pattern
+        if (x - dx >= 0 and y - dy >= 0 and
+                x - dx < board.l and y - dy < board.l and
+                board.grid[x - dx][y - dy] == player):
             return None
 
-        # Count consecutive pieces
         count = 0
-        x, y = start_x, start_y
-
+        # Count consecutive pieces
         while (0 <= x < board.l and 0 <= y < board.l and
                board.grid[x][y] == player):
             count += 1
             x += dx
             y += dy
 
-        if count < 2:  # Need at least 2 in a row to be interesting
+        if count < 2:
             return None
 
-        # Check if this is the start of the pattern (no player piece before it)
-        is_start = (start_x - dx < 0 or start_y - dy < 0 or
-                    start_x - dx >= board.l or start_y - dy >= board.l or
-                    board.grid[start_x - dx][start_y - dy] != player)
+        # Check openness
+        open_start = (x - (count + 1) * dx >= 0 and y - (count + 1) * dy >= 0 and
+                      x - (count + 1) * dx < board.l and y - (count + 1) * dy < board.l and
+                      board.grid[x - (count + 1) * dx][y - (count + 1) * dy] == '.')
 
-        if not is_start:
-            return None  # This is part of a pattern we've already counted
-
-        # Check openness at both ends
-        open_start = (0 <= start_x - dx < board.l and
-                      0 <= start_y - dy < board.l and
-                      board.grid[start_x - dx][start_y - dy] == '.')
-
-        open_end = (0 <= x < board.l and
-                    0 <= y < board.l and
+        open_end = (0 <= x < board.l and 0 <= y < board.l and
                     board.grid[x][y] == '.')
 
-        # Determine pattern type
+        # Classify pattern
         if count >= 5:
-            return "FIVE", count
+            return "FIVE"
         elif count == 4:
             if open_start and open_end:
-                return "LIVE_FOUR", count
+                return "LIVE_FOUR"
             elif open_start or open_end:
-                return "DEAD_FOUR", count
+                return "DEAD_FOUR"
         elif count == 3:
             if open_start and open_end:
-                return "LIVE_THREE", count
+                return "LIVE_THREE"
             elif open_start or open_end:
-                return "DEAD_THREE", count
+                return "DEAD_THREE"
         elif count == 2:
             if open_start and open_end:
-                return "LIVE_TWO", count
+                return "LIVE_TWO"
             elif open_start or open_end:
-                return "DEAD_TWO", count
+                return "DEAD_TWO"
         return None
-

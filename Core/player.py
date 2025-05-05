@@ -1,3 +1,6 @@
+import random
+
+
 class Player:
     def __init__(self, name, symbol):
         self.name = name
@@ -34,5 +37,15 @@ class AIPlayer(Player):
         self.depth = depth
 
     def getMove(self, board):
-        return self.algorithm(board, self.symbol, self.depth)
+        move = self.algorithm(board, self.symbol, self.depth)
+        if not board.validMove(*move):  # Validate AI move
+            move = self.get_fallback_move(board)
+        return move
+
+    def get_fallback_move(self, board):
+        """Get center or random valid move if AI fails"""
+        center = board.l // 2
+        if board.validMove(center, center):
+            return (center, center)
+        return (14,14)
 
