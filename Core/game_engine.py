@@ -23,6 +23,7 @@ class GameEngine:
 
                 if self.board.winCheck(x, y, player.symbol):
                     print(f"\n{player.name} ({player.symbol}) wins!")
+                    player.addWin()
                     return
 
                 self.currIdx = 1 - self.currIdx
