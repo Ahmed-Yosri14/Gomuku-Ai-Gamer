@@ -47,5 +47,5 @@ class AIPlayer(Player):
         center = board.l // 2
         if board.validMove(center, center):
             return (center, center)
-        return (14,14)
+        return random.choice(board.possibleMoves()) if board.possibleMoves() else (0,0)
 
