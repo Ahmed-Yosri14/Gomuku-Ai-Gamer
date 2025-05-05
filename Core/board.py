@@ -36,12 +36,12 @@ class Board:
         def count(dx, dy):
             i = x + dx
             j = y + dy
-            c = 0
+            cnt = 0
             while 0 <= i < self.l and 0 <= j < self.l and self.grid[i][j] == X_O:
-                count += 1
+                cnt += 1
                 i += dx
                 j += dy
-            return count
+            return cnt
 
         dxdy= [(1,0), (0,1), (1,1), (1,-1)]
         for dx, dy in dxdy:
@@ -64,4 +64,15 @@ class Board:
             print(f"{idx:2} ", end="")
             for cell in self.grid[idx]:
                 print(f"{cell}  ", end="")
-            print() 
+            print()
+
+# temp
+    def hasWinner(self):
+        """Check if there's a winner on the board"""
+        # Check for horizontal, vertical, and diagonal wins
+        for i in range(self.l):
+            for j in range(self.l):
+                if self.grid[i][j] != '.':
+                    if self.winCheck(i, j, self.grid[i][j]):
+                        return self.grid[i][j]
+        return None
