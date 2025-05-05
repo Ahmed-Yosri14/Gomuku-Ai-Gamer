@@ -26,8 +26,8 @@ class Board:
 
     def possibleMoves(self):
         all = []
-        for i in self.l:
-            for j in self.l:
+        for i in range(self.l):
+            for j in range(self.l):
                 if self.grid[i][j] == '.':
                     all.append((i,j))
         return all
@@ -50,17 +50,17 @@ class Board:
         return False
 
     def makeBoard(self):
-        nwBoard = Board(self.size)
+        nwBoard = Board(self.l)
         nwBoard.grid = [row[:] for row in self.grid]
         return nwBoard
 
     def printBoard(self):
         print("  ", end="")
-        for i in range(self.size):
+        for i in range(self.l):
             print(f"{i:2}", end=" ")
         print()
 
-        for idx in range(self.size):
+        for idx in range(self.l):
             print(f"{idx:2} ", end="")
             for cell in self.grid[idx]:
                 print(f"{cell}  ", end="")
