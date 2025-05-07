@@ -1,5 +1,5 @@
 class Board:
-    def __init__(self, l=15): # defult 15 but it can be square of any l
+    def __init__(self, l=15):
         self.l = l
         self.grid = [['.' for _ in range(l)] for _ in range(l)]
 
@@ -45,7 +45,7 @@ class Board:
 
         dxdy= [(1,0), (0,1), (1,1), (1,-1)]
         for dx, dy in dxdy:
-            if 1 + count(dx, dy) + count(-dx, -dy) >= 5: # counting upwand and downward( if it was two parts in the same directions starting from the current point)
+            if 1 + count(dx, dy) + count(-dx, -dy) >= 5:
                 return True
         return False
 
@@ -68,8 +68,6 @@ class Board:
 
 # temp
     def hasWinner(self):
-        """Check if there's a winner on the board"""
-        # Check for horizontal, vertical, and diagonal wins
         for i in range(self.l):
             for j in range(self.l):
                 if self.grid[i][j] != '.':
