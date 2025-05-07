@@ -17,22 +17,21 @@ class GomokuGUI:
         self.names = names
         self.cell_size = 40
         board = Board(size)
-        minimaxAlgo = MiniMax(playerOne='X', playerTwo='O', maxDepth=3)
+        minimaxAlgo = MiniMax(playerOne='X', playerTwo='O', maxDepth=2)
 
         def ai_move(b, symbol, depth):
-            # Configure minimax with the correct player symbols
             minimaxAlgo.playerOne = symbol
             minimaxAlgo.playerTwo = 'O' if symbol == 'X' else 'X'
             return minimaxAlgo.FindBestMove(b, symbol)
-        if mode == "1":  # H vs H
+        if mode == "1":
             p1 = HumanPlayer(names[0], 'X')
             p2 = HumanPlayer(names[1], 'O')
-        elif mode == "2":  # H vs AI
+        elif mode == "2":
             p1 = HumanPlayer(names[0], 'X')
             p2 = AIPlayer("AI Bot", 'O', ai_move)
-        else:  # AI vs AI
-            p1 = AIPlayer("AI X", 'X', lambda b, s, d: (0, 0))
-            p2 = AIPlayer("AI O", 'O', lambda b, s, d: (0, 0))
+        else:
+            p1 = AIPlayer("AI Bot Black", 'X', ai_move)
+            p2 = AIPlayer("AI Bot White", 'O', ai_move)
         self.engine = GameEngine(board, p1, p2)
         self.awaiting_human_move = False
 
@@ -97,7 +96,7 @@ class GomokuGUI:
         if isinstance(player, HumanPlayer):
             self.awaiting_human_move = True
             self.update_status_label()
-        else:  # AI's turn
+        else:
             self.awaiting_human_move = False
             res = self.engine.step()
             self.draw_board()
@@ -118,7 +117,6 @@ def get_setup_gui():
     root = tk.Tk()
     root.withdraw()
 
-    # Mode
     while True:
         mode = simpledialog.askstring(
             "Gomoku Mode",
@@ -130,7 +128,6 @@ def get_setup_gui():
             root.destroy()
             exit()
 
-    # Size
     while True:
         size = simpledialog.askinteger("Board Size", "Enter board size (default 15):",
                                        minvalue=5, maxvalue=30, parent=root)
@@ -140,7 +137,6 @@ def get_setup_gui():
             root.destroy()
             exit()
 
-    # Names
     if mode == "1":
         name1 = simpledialog.askstring("Player 1", "Black stone name:", parent=root) or "Black"
         name2 = simpledialog.askstring("Player 2", "White stone name:", parent=root) or "White"

@@ -45,7 +45,6 @@ class GameEngine:
             if move is None:
                 return {"status": "awaiting_input", "winner": None}
             x, y = move
-
         if not self.board.validMove(x, y):
             return {"status": "invalid", "winner": None}
         self.board.playMove(x, y, player.symbol)
