@@ -3,6 +3,7 @@ from Core.board import Board
 from Core.player import HumanPlayer, AIPlayer
 from Core.game_engine import GameEngine
 from Utils.display import *
+from Ai.alphabeta import AlphaBeta
 
 def run_console():
     printWelcome()
@@ -12,12 +13,18 @@ def run_console():
     size = int(size) if size.isdigit() else 15
     board = Board(size)
     minimaxAlgo = MiniMax(playerOne='X', playerTwo='O', maxDepth=3)
+    alphabetaAlgo = AlphaBeta(playerOne='X', playerTwo='O', maxDepth=3)
 
     def ai_move(b, symbol, depth):
         # Configure minimax with the correct player symbols
         minimaxAlgo.playerOne = symbol
         minimaxAlgo.playerTwo = 'O' if symbol == 'X' else 'X'
         return minimaxAlgo.FindBestMove(b, symbol)
+
+    def alpha_move(b, symbol, depth):
+        alphabetaAlgo.playerOne = symbol
+        alphabetaAlgo.playerTwo = 'O' if symbol == 'X' else 'X'
+        return alphabetaAlgo.FindBestMove(b, symbol)
 
     if mode == "1":
         name1 = input("Player 1 name: ")
@@ -29,11 +36,11 @@ def run_console():
         p1 = HumanPlayer(name, 'X')
          # TODO: Replace (0, 0) with real AI move using minimax/alpha-beta later
 
-        p2 = AIPlayer("AI Bot", 'O', ai_move)
+        p2 = AIPlayer("AI Bot", 'O', alpha_move)
     else:
          # TODO: Replace (0, 0) with real AI move using minimax/alpha-beta later
-        p1 = AIPlayer("AI X", 'X', lambda b, s, d: (0, 0))
-        p2 = AIPlayer("AI O", 'O', lambda b, s, d: (0, 0))
+        p1 = AIPlayer("AI X", 'X', lambda b, s, d: ai_move(b, s, d))
+        p2 = AIPlayer("AI O", 'O', lambda b, s, d: alpha_move(b, s, d))
 
     game = GameEngine(board, p1, p2)
     game.play()

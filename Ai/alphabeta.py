@@ -45,12 +45,12 @@ class AlphaBeta:
             temp_board.playMove(x, y, player)
 
             if player == self.playerOne:
-                score = self.minimax(temp_board, self.maxDepth - 1, False)
+                score = self.alphabeta(temp_board, self.maxDepth - 1, False)
                 if score > best_score:
                     best_score = score
                     best_move = move
             else:
-                score = self.minimax(temp_board, self.maxDepth - 1, True)
+                score = self.alphabeta(temp_board, self.maxDepth - 1, True)
                 if score < best_score:
                     best_score = score
                     best_move = move
@@ -170,7 +170,7 @@ class AlphaBeta:
                 x, y = move
                 temp_board = copy.deepcopy(board)
                 temp_board.playMove(x, y, self.playerOne)
-                eval = self.minimax(temp_board, depth - 1, False, alpha, beta)
+                eval = self.alphabeta(temp_board, depth - 1, False, alpha, beta)
                 max_eval = max(max_eval, eval)
                 alpha = max(alpha, eval)
                 if beta<=alpha:
@@ -182,7 +182,7 @@ class AlphaBeta:
                 x, y = move
                 temp_board = copy.deepcopy(board)
                 temp_board.playMove(x, y, self.playerTwo)  # Fixed: was playing playerOne
-                eval = self.minimax(temp_board, depth - 1, True, alpha, beta)
+                eval = self.alphabeta(temp_board, depth - 1, True, alpha, beta)
                 min_eval = min(min_eval, eval)
                 beta = min(beta, eval)
                 if beta<=alpha:
@@ -210,7 +210,7 @@ class AlphaBeta:
                 if board.grid[i][j] == player:
                     for dx, dy in directions:
                         # Check if we've already evaluated this pattern
-                        if (i - dx >= 0 and j - dy >= 0 and
+                        if (0 <= i - dx < board.l and 0 <= j - dy < board.l and
                                 board.grid[i - dx][j - dy] == player):
                             continue
 

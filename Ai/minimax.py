@@ -204,7 +204,7 @@ class MiniMax:
                 if board.grid[i][j] == player:
                     for dx, dy in directions:
                         # Check if we've already evaluated this pattern
-                        if (i - dx >= 0 and j - dy >= 0 and
+                        if (0 <= i - dx < board.l and 0 <= j - dy < board.l and
                                 board.grid[i - dx][j - dy] == player):
                             continue
 
