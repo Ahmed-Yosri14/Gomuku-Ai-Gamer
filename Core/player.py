@@ -38,12 +38,11 @@ class AIPlayer(Player):
 
     def getMove(self, board):
         move = self.algorithm(board, self.symbol, self.depth)
-        if not board.validMove(*move):  # Validate AI move
+        if not board.validMove(*move):
             move = self.get_fallback_move(board)
         return move
 
     def get_fallback_move(self, board):
-        """Get center or random valid move if AI fails"""
         center = board.l // 2
         if board.validMove(center, center):
             return (center, center)
