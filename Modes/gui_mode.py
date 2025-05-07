@@ -4,6 +4,7 @@ from Core.board import Board
 from Core.player import HumanPlayer, AIPlayer
 from Core.game_engine import GameEngine
 from Ai.minimax import MiniMax
+from Ai.alphabeta import AlphaBeta
 
 STONE_RADIUS_RATIO = 0.4
 SYMBOL_TO_COLOR = {'X': 'black', 'O': 'white'}
@@ -18,12 +19,18 @@ class GomokuGUI:
         self.cell_size = 40
         board = Board(size)
         minimaxAlgo = MiniMax(playerOne='X', playerTwo='O', maxDepth=3)
+        alphabetaAlgo = AlphaBeta(playerOne='X', playerTwo='O', maxDepth=3)
 
         def ai_move(b, symbol, depth):
             # Configure minimax with the correct player symbols
             minimaxAlgo.playerOne = symbol
             minimaxAlgo.playerTwo = 'O' if symbol == 'X' else 'X'
             return minimaxAlgo.FindBestMove(b, symbol)
+
+        def alpha_move(b, symbol, depth):
+            alphabetaAlgo.playerOne = symbol
+            alphabetaAlgo.playerTwo = 'O' if symbol == 'X' else 'X'
+            return alphabetaAlgo.FindBestMove(b, symbol)
         if mode == "1":  # H vs H
             p1 = HumanPlayer(names[0], 'X')
             p2 = HumanPlayer(names[1], 'O')
@@ -31,8 +38,8 @@ class GomokuGUI:
             p1 = HumanPlayer(names[0], 'X')
             p2 = AIPlayer("AI Bot", 'O', ai_move)
         else:  # AI vs AI
-            p1 = AIPlayer("AI X", 'X', lambda b, s, d: (0, 0))
-            p2 = AIPlayer("AI O", 'O', lambda b, s, d: (0, 0))
+            p1 = AIPlayer("AI X", 'X', lambda b, s, d: ai_move(b, s, d))
+            p2 = AIPlayer("AI O", 'O', lambda b, s, d: alpha_move(b, s, d))
         self.engine = GameEngine(board, p1, p2)
         self.awaiting_human_move = False
 

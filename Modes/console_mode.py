@@ -36,7 +36,7 @@ def run_console():
         p1 = HumanPlayer(name, 'X')
          # TODO: Replace (0, 0) with real AI move using minimax/alpha-beta later
 
-        p2 = AIPlayer("AI Bot", 'O', alpha_move)
+        p2 = AIPlayer("AI Bot", 'O', ai_move)
     else:
          # TODO: Replace (0, 0) with real AI move using minimax/alpha-beta later
         p1 = AIPlayer("AI X", 'X', lambda b, s, d: ai_move(b, s, d))
