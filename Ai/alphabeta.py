@@ -5,7 +5,7 @@ from typing import List, Tuple, Optional
 
 
 class AlphaBeta:
-    def __init__(self, playerOne: str = 'X', playerTwo: str = 'O', maxDepth: int = 4):
+    def __init__(self, playerOne: str = 'X', playerTwo: str = 'O', maxDepth: int = 3):
         self.playerOne = playerOne
         self.playerTwo = playerTwo
         self.maxDepth = maxDepth
@@ -14,16 +14,16 @@ class AlphaBeta:
         self.pattern_weights = {
             "LIVE_TWO": 10,
             "LIVE_THREE": 100,
-            "LIVE_FOUR": 10000,
+            "LIVE_FOUR": 10000,  # Increased weight for immediate threats
             "DEAD_TWO": 1,
             "DEAD_THREE": 10,
             "DEAD_FOUR": 100,
-            "FIVE": 1000000,
-            "OPEN_FOUR": 100000
+            "FIVE": 1000000,  # Higher weight for winning move
+            "OPEN_FOUR": 100000  # Special case for immediate threat
         }
 
     def FindBestMove(self, board, player) -> Tuple[int, int]:
-        """Find the best move using Alpha-Beta pruning with threat detection"""
+        """Find the best move for the given player with threat detection"""
         # First check for immediate winning moves or blocks
         immediate_move = self.check_immediate_moves(board, player)
         if immediate_move:
@@ -31,15 +31,10 @@ class AlphaBeta:
 
         best_move = None
         best_score = -math.inf if player == self.playerOne else math.inf
-        alpha = -math.inf
-        beta = math.inf
 
         possible_moves = self.get_relevant_moves(board)
         if not possible_moves:
             return self.get_random_move(board)
-
-        # Sort moves by heuristic to improve alpha-beta pruning efficiency
-        possible_moves = self.sort_moves_by_heuristic(board, possible_moves, player)
 
         for move in possible_moves:
             x, y = move
@@ -50,38 +45,17 @@ class AlphaBeta:
             temp_board.playMove(x, y, player)
 
             if player == self.playerOne:
-                score = self.alphabeta(temp_board, self.maxDepth - 1, alpha, beta, False)
+                score = self.minimax(temp_board, self.maxDepth - 1, False)
                 if score > best_score:
                     best_score = score
                     best_move = move
-                    alpha = max(alpha, best_score)
             else:
-                score = self.alphabeta(temp_board, self.maxDepth - 1, alpha, beta, True)
+                score = self.minimax(temp_board, self.maxDepth - 1, True)
                 if score < best_score:
                     best_score = score
                     best_move = move
-                    beta = min(beta, best_score)
-
-            # Alpha-beta pruning
-            if alpha >= beta:
-                break
 
         return best_move if best_move else self.get_random_move(board)
-
-    def sort_moves_by_heuristic(self, board, moves, player):
-        """Sort moves based on a simple heuristic to improve alpha-beta pruning"""
-        scored_moves = []
-        for move in moves:
-            x, y = move
-            temp_board = copy.deepcopy(board)
-            temp_board.playMove(x, y, player)
-            score = self.evaluate_board(temp_board)
-            scored_moves.append((score, move))
-
-        # Sort descending for maximizing player, ascending for minimizing
-        reverse = (player == self.playerOne)
-        scored_moves.sort(key=lambda x: x[0], reverse=reverse)
-        return [move for (score, move) in scored_moves]
 
     def check_immediate_moves(self, board, player):
         """Check for moves that win immediately or block opponent's win"""
@@ -152,47 +126,6 @@ class AlphaBeta:
 
         return open_fours
 
-    def alphabeta(self, board, depth, alpha, beta, is_maximizing):
-        """Alpha-Beta pruning algorithm"""
-        # Check terminal conditions
-        winner = board.hasWinner()
-        if winner == self.playerOne:
-            return 1000000 + depth  # Prefer faster wins
-        elif winner == self.playerTwo:
-            return -1000000 - depth  # Prefer slower losses
-        elif board.isFull():
-            return 0
-
-        if depth == 0:
-            return self.evaluate_board(board)
-
-        moves = self.get_relevant_moves(board)
-        if not moves:
-            return self.evaluate_board(board)
-
-        if is_maximizing:
-            value = -math.inf
-            for move in moves:
-                x, y = move
-                temp_board = copy.deepcopy(board)
-                temp_board.playMove(x, y, self.playerOne)
-                value = max(value, self.alphabeta(temp_board, depth - 1, alpha, beta, False))
-                alpha = max(alpha, value)
-                if alpha >= beta:
-                    break  # Beta cutoff
-            return value
-        else:
-            value = math.inf
-            for move in moves:
-                x, y = move
-                temp_board = copy.deepcopy(board)
-                temp_board.playMove(x, y, self.playerTwo)
-                value = min(value, self.alphabeta(temp_board, depth - 1, alpha, beta, True))
-                beta = min(beta, value)
-                if alpha >= beta:
-                    break  # Alpha cutoff
-            return value
-
     def get_random_move(self, board):
         """Fallback to random valid move"""
         valid_moves = []
@@ -215,6 +148,46 @@ class AlphaBeta:
                                     board.grid[ni][nj] == '.'):
                                 moves.add((ni, nj))
         return list(moves) if moves else board.possibleMoves()
+
+    def alphabeta(self, board, depth, is_maximizing, alpha=-math.inf, beta=math.inf):
+        # Check terminal conditions
+        winner = board.hasWinner()
+        if winner == self.playerOne:
+            return 1000000 + depth  # Prefer faster wins
+        elif winner == self.playerTwo:
+            return -1000000 - depth  # Prefer slower losses
+        elif board.isFull():
+            return 0
+
+        if depth == 0:
+            return self.evaluate_board(board)
+
+        moves = self.get_relevant_moves(board)
+
+        if is_maximizing:
+            max_eval = -math.inf
+            for move in moves:
+                x, y = move
+                temp_board = copy.deepcopy(board)
+                temp_board.playMove(x, y, self.playerOne)
+                eval = self.minimax(temp_board, depth - 1, False, alpha, beta)
+                max_eval = max(max_eval, eval)
+                alpha = max(alpha, eval)
+                if beta<=alpha:
+                    break
+            return max_eval
+        else:
+            min_eval = math.inf
+            for move in moves:
+                x, y = move
+                temp_board = copy.deepcopy(board)
+                temp_board.playMove(x, y, self.playerTwo)  # Fixed: was playing playerOne
+                eval = self.minimax(temp_board, depth - 1, True, alpha, beta)
+                min_eval = min(min_eval, eval)
+                beta = min(beta, eval)
+                if beta<=alpha:
+                    break
+            return min_eval
 
     def evaluate_board(self, board):
         """Improved board evaluation with better pattern detection"""
