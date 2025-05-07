@@ -31,15 +31,15 @@ class GomokuGUI:
             alphabetaAlgo.playerOne = symbol
             alphabetaAlgo.playerTwo = 'O' if symbol == 'X' else 'X'
             return alphabetaAlgo.FindBestMove(b, symbol)
-        if mode == "1":  # H vs H
+        if mode == "1":
             p1 = HumanPlayer(names[0], 'X')
             p2 = HumanPlayer(names[1], 'O')
-        elif mode == "2":  # H vs AI
+        elif mode == "2":
             p1 = HumanPlayer(names[0], 'X')
             p2 = AIPlayer("AI Bot", 'O', ai_move)
-        else:  # AI vs AI
-            p1 = AIPlayer("AI X", 'X', lambda b, s, d: ai_move(b, s, d))
-            p2 = AIPlayer("AI O", 'O', lambda b, s, d: alpha_move(b, s, d))
+        else:
+            p1 = AIPlayer("AI X", 'X',ai_move)
+            p2 = AIPlayer("AI O", 'O',alpha_move)
         self.engine = GameEngine(board, p1, p2)
         self.awaiting_human_move = False
 

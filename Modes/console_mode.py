@@ -16,7 +16,6 @@ def run_console():
     alphabetaAlgo = AlphaBeta(playerOne='X', playerTwo='O', maxDepth=3)
 
     def ai_move(b, symbol, depth):
-        # Configure minimax with the correct player symbols
         minimaxAlgo.playerOne = symbol
         minimaxAlgo.playerTwo = 'O' if symbol == 'X' else 'X'
         return minimaxAlgo.FindBestMove(b, symbol)
@@ -34,13 +33,10 @@ def run_console():
     elif mode == "2":
         name = input("Your name: ")
         p1 = HumanPlayer(name, 'X')
-         # TODO: Replace (0, 0) with real AI move using minimax/alpha-beta later
-
         p2 = AIPlayer("AI Bot", 'O', ai_move)
     else:
-         # TODO: Replace (0, 0) with real AI move using minimax/alpha-beta later
-        p1 = AIPlayer("AI X", 'X', lambda b, s, d: ai_move(b, s, d))
-        p2 = AIPlayer("AI O", 'O', lambda b, s, d: alpha_move(b, s, d))
+         p1 = AIPlayer("AI X", 'X', ai_move)
+         p2 = AIPlayer("AI O", 'O', alpha_move)
 
     game = GameEngine(board, p1, p2)
     game.play()
