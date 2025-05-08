@@ -41,19 +41,16 @@ class AlphaBeta:
             if not board.validMove(x, y):
                 continue
 
-            temp_board = copy.deepcopy(board)
-            temp_board.playMove(x, y, player)
+            board.playMove(x, y, player)
+            score = self.alphabeta(board, self.maxDepth - 1, player != self.playerOne)
+            board.undoMove(x, y)
 
-            if player == self.playerOne:
-                score = self.alphabeta(temp_board, self.maxDepth - 1, False)
-                if score > best_score:
-                    best_score = score
-                    best_move = move
-            else:
-                score = self.alphabeta(temp_board, self.maxDepth - 1, True)
-                if score < best_score:
-                    best_score = score
-                    best_move = move
+            if player == self.playerOne and score > best_score:
+                best_score = score
+                best_move = move
+            elif player == self.playerTwo and score < best_score:
+                best_score = score
+                best_move = move
 
         return best_move if best_move else self.get_random_move(board)
 
@@ -168,24 +165,25 @@ class AlphaBeta:
             max_eval = -math.inf
             for move in moves:
                 x, y = move
-                temp_board = copy.deepcopy(board)
-                temp_board.playMove(x, y, self.playerOne)
-                eval = self.alphabeta(temp_board, depth - 1, False, alpha, beta)
-                max_eval = max(max_eval, eval)
-                alpha = max(alpha, eval)
-                if beta<=alpha:
-                    break
+                if board.validMove(x, y):
+                    board.playMove(x, y, self.playerOne)
+                    eval = self.alphabeta(board, depth - 1, False, alpha, beta)
+                    board.undoMove(x, y)
+                    max_eval = max(max_eval, eval)
+                    alpha = max(alpha, eval)
+                    if beta <= alpha:
+                        break
             return max_eval
         else:
             min_eval = math.inf
             for move in moves:
                 x, y = move
-                temp_board = copy.deepcopy(board)
-                temp_board.playMove(x, y, self.playerTwo)  # Fixed: was playing playerOne
-                eval = self.alphabeta(temp_board, depth - 1, True, alpha, beta)
+                board.playMove(x, y, self.playerTwo)
+                eval = self.alphabeta(board, depth - 1, True, alpha, beta)
+                board.undoMove(x, y)
                 min_eval = min(min_eval, eval)
                 beta = min(beta, eval)
-                if beta<=alpha:
+                if beta <= alpha:
                     break
             return min_eval
 
