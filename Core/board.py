@@ -14,6 +14,9 @@ class Board:
             return True
         return False
 
+    def undoMove(self, x, y):
+        self.grid[x][y] = '.'
+
     def isFull(self):
         ok=True
         for row in self.grid :

@@ -23,8 +23,6 @@ class MiniMax:
         }
 
     def FindBestMove(self, board, player) -> Tuple[int, int]:
-        """Find the best move for the given player with threat detection"""
-        # First check for immediate winning moves or blocks
         immediate_move = self.check_immediate_moves(board, player)
         if immediate_move:
             return immediate_move
@@ -41,19 +39,16 @@ class MiniMax:
             if not board.validMove(x, y):
                 continue
 
-            temp_board = copy.deepcopy(board)
-            temp_board.playMove(x, y, player)
+            board.playMove(x, y, player)
+            score = self.minimax(board, self.maxDepth - 1, player != self.playerOne)
+            board.undoMove(x, y)
 
-            if player == self.playerOne:
-                score = self.minimax(temp_board, self.maxDepth - 1, False)
-                if score > best_score:
-                    best_score = score
-                    best_move = move
-            else:
-                score = self.minimax(temp_board, self.maxDepth - 1, True)
-                if score < best_score:
-                    best_score = score
-                    best_move = move
+            if player == self.playerOne and score > best_score:
+                best_score = score
+                best_move = move
+            elif player == self.playerTwo and score < best_score:
+                best_score = score
+                best_move = move
 
         return best_move if best_move else self.get_random_move(board)
 
@@ -168,19 +163,21 @@ class MiniMax:
             max_eval = -math.inf
             for move in moves:
                 x, y = move
-                temp_board = copy.deepcopy(board)
-                temp_board.playMove(x, y, self.playerOne)
-                eval = self.minimax(temp_board, depth - 1, False)
-                max_eval = max(max_eval, eval)
+                if board.validMove(x, y):
+                    board.playMove(x, y, self.playerOne)
+                    eval = self.minimax(board, depth - 1, False)
+                    board.undoMove(x, y)
+                    max_eval = max(max_eval, eval)
             return max_eval
         else:
             min_eval = math.inf
             for move in moves:
                 x, y = move
-                temp_board = copy.deepcopy(board)
-                temp_board.playMove(x, y, self.playerTwo)  # Fixed: was playing playerOne
-                eval = self.minimax(temp_board, depth - 1, True)
-                min_eval = min(min_eval, eval)
+                if board.validMove(x, y):
+                    board.playMove(x, y, self.playerTwo)
+                    eval = self.minimax(board, depth - 1, True)
+                    board.undoMove(x, y)
+                    min_eval = min(min_eval, eval)
             return min_eval
 
     def evaluate_board(self, board):
