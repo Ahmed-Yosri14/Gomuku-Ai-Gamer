@@ -12,8 +12,8 @@ def run_console():
     size = input("Enter board size (default 15): ").strip()
     size = int(size) if size.isdigit() else 15
     board = Board(size)
-    minimaxAlgo = MiniMax(playerOne='X', playerTwo='O', maxDepth=3)
-    alphabetaAlgo = AlphaBeta(playerOne='X', playerTwo='O', maxDepth=3)
+    minimaxAlgo = MiniMax(playerOne='X', playerTwo='O', maxDepth=2)
+    alphabetaAlgo = AlphaBeta(playerOne='X', playerTwo='O', maxDepth=2)
 
     def ai_move(b, symbol, depth):
         minimaxAlgo.playerOne = symbol
@@ -35,7 +35,7 @@ def run_console():
         p1 = HumanPlayer(name, 'X')
         p2 = AIPlayer("AI Bot", 'O', ai_move)
     else:
-         p1 = AIPlayer("AI X", 'X', ai_move)
+         p1 = AIPlayer("AI X", 'X', alpha_move)
          p2 = AIPlayer("AI O", 'O', alpha_move)
 
     game = GameEngine(board, p1, p2)
