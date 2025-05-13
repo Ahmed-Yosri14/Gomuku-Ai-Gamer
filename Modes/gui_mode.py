@@ -72,7 +72,7 @@ class GomokuGUI:
         self.cell_size = 40
         board = Board(size)
         self.minimaxAlgo = MiniMax(playerOne='X', playerTwo='O', maxDepth=3)
-        self.alphabetaAlgo = AlphaBeta(playerOne='X', playerTwo='O', maxDepth=2)
+        self.alphabetaAlgo = AlphaBeta(playerOne='X', playerTwo='O', maxDepth=3)
 
         if mode in ("1", "2"):
             self.switch_button = Button(root, text="Switch to AI vs AI", command=self.switch_to_ai_vs_ai,
