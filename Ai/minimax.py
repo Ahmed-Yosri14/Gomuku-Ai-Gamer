@@ -6,6 +6,7 @@ from typing import List, Tuple, Optional
 
 class MiniMax:
     def __init__(self, playerOne: str = 'X', playerTwo: str = 'O', maxDepth: int = 3):
+        self.transposition_table = {}
         self.playerOne = playerOne
         self.playerTwo = playerTwo
         self.maxDepth = maxDepth
@@ -19,10 +20,21 @@ class MiniMax:
             "FIVE": 100000000,
             "OPEN_FOUR": 10000000
         }
+        self.first_move = True  # Added to track if this is the first move
+
+        # for hashing
+    def board_to_key(self, board):
+        return ''.join(''.join(row) for row in board.grid)
 
     def FindBestMove(self, board, player) -> Tuple[int, int]:
+        if self.first_move and all(board.grid[i][j] == '.' for i in range(board.l) for j in range(board.l)):
+            self.first_move = False
+            middle = board.l // 2
+            return (middle, middle)
+
         immediate_move = self.check_immediate_moves(board, player)
         if immediate_move:
+            self.first_move = False
             return immediate_move
 
         best_move = None
@@ -30,6 +42,7 @@ class MiniMax:
 
         possible_moves = self.get_relevant_moves(board)
         if not possible_moves:
+            self.first_move = False
             return self.get_random_move(board)
 
         for move in possible_moves:
@@ -37,20 +50,17 @@ class MiniMax:
             if not board.validMove(x, y):
                 continue
 
-            temp_board = copy.deepcopy(board)
-            temp_board.playMove(x, y, player)
+            board.playMove(x, y, player)
+            score = self.minimax(board, self.maxDepth - 1, player != self.playerOne)
+            board.undoMove(x, y)
+            if player == self.playerOne and score > best_score:
+                best_score = score
+                best_move = move
+            elif player == self.playerTwo and score < best_score:
+                best_score = score
+                best_move = move
 
-            if player == self.playerOne:
-                score = self.minimax(temp_board, self.maxDepth - 1, False)
-                if score > best_score:
-                    best_score = score
-                    best_move = move
-            else:
-                score = self.minimax(temp_board, self.maxDepth - 1, True)
-                if score < best_score:
-                    best_score = score
-                    best_move = move
-
+        self.first_move = False
         return best_move if best_move else self.get_random_move(board)
 
     def check_immediate_moves(self, board, player):
@@ -125,18 +135,37 @@ class MiniMax:
 
     def get_relevant_moves(self, board):
         moves = set()
+
+        # First priority: immediate wins or blocks
+        for i in range(board.l):
+            for j in range(board.l):
+                if board.grid[i][j] == '.':
+                    for player in [self.playerOne, self.playerTwo]:
+                        board.grid[i][j] = player
+                        if board.hasWinner() == player:
+                            board.grid[i][j] = '.'
+                            return [(i, j)]  # Return immediately for critical moves
+                        board.grid[i][j] = '.'
+
+        # Second priority: moves near existing pieces (but more focused)
         for i in range(board.l):
             for j in range(board.l):
                 if board.grid[i][j] != '.':
+                    # Only check adjacent squares (reduced from 5x5 to 3x3 area)
                     for di in [-1, 0, 1]:
                         for dj in [-1, 0, 1]:
+                            if di == 0 and dj == 0:
+                                continue
                             ni, nj = i + di, j + dj
-                            if (0 <= ni < board.l and 0 <= nj < board.l and
-                                    board.grid[ni][nj] == '.'):
+                            if 0 <= ni < board.l and 0 <= nj < board.l and board.grid[ni][nj] == '.':
                                 moves.add((ni, nj))
+
         return list(moves) if moves else board.possibleMoves()
 
     def minimax(self, board, depth, is_maximizing):
+        key = (self.board_to_key(board), depth, is_maximizing)
+        if key in self.transposition_table:
+            return self.transposition_table[key]
         winner = board.hasWinner()
         if winner == self.playerOne:
             return 1000000 + depth
@@ -154,19 +183,21 @@ class MiniMax:
             max_eval = -math.inf
             for move in moves:
                 x, y = move
-                temp_board = copy.deepcopy(board)
-                temp_board.playMove(x, y, self.playerOne)
-                eval = self.minimax(temp_board, depth - 1, False)
+                board.playMove(x, y, self.playerOne)
+                eval = self.minimax(board, depth - 1, False)
+                board.undoMove(x,y)
                 max_eval = max(max_eval, eval)
+            self.transposition_table[key] = max_eval
             return max_eval
         else:
             min_eval = math.inf
             for move in moves:
                 x, y = move
-                temp_board = copy.deepcopy(board)
-                temp_board.playMove(x, y, self.playerTwo)
-                eval = self.minimax(temp_board, depth - 1, True)
+                board.playMove(x, y, self.playerTwo)
+                eval = self.minimax(board, depth - 1, True)
+                board.undoMove(x, y)
                 min_eval = min(min_eval, eval)
+            self.transposition_table[key] = min_eval
             return min_eval
 
     def evaluate_board(self, board):
