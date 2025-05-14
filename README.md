@@ -1,4 +1,4 @@
-# Gomoku AI Game
+# Gomoku Game
 
 A Python-based AI engine to play **Gomoku (Five in a Row)**. Includes:
 - **Human vs AI** mode using the Minimax algorithm
@@ -44,7 +44,7 @@ Make sure you are in the **`Gomuku-Ai-Gamer/`** folder, which contains `main.py`
 For example:
 
 ```bash
-cd <path/to>/Gomuku-Ai-Gamer  //put your path inside the <>
+cd <path/to>/Gomuku-Ai-Gamer  //put your path instead of the <>
 python main.py
 ```
 Then Chose the **Mode** you want to play in :
