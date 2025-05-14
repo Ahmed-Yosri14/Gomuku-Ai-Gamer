@@ -48,7 +48,7 @@ cd <path/to>/Gomuku-Ai-Gamer  //put your path inside the <>
 python main.py
 ```
 Then Chose the **Mode** you want to play in :
-**1** for the console Mode, and **2** for the GUI Mode (which is more fun, you know).
+- **1** for the console Mode, and **2** for the GUI Mode (which is more fun, you know).
 
 After that chose The Game Mode and Board size:
 - Human vs Human
