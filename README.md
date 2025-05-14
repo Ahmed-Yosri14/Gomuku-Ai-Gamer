@@ -27,31 +27,6 @@ Gomoku is a strategy board game played on a grid. Players alternate turns to pla
 
 ---
 
-## Project Structure
-Gomuku-Ai-Gamer/
-├── Ai/
-│ ├── alphabeta.py # Alpha-Beta Pruning algorithm
-│ └── minimax.py # Minimax algorithm
-│
-├── Core/
-│ ├── board.py # Board representation and rules
-│ ├── game_engine.py # Game engine and logic
-│ └── player.py # Player types (human, AI)
-│
-├── Modes/
-│ ├── console_mode.py # Console interface for the game
-│ └── gui_mode.py # GUI interface using Tkinter
-│
-├── Utils/
-│ ├── display.py # Board display functions
-│ └── move_parser.py # Input parser and validation
-│
-├── main.py # Entry point (Start Playing here!)
-└── README.md # Project documentation
-
-
----
-
 ##  How to Run and Play the game on your PC
 
 ###  Requirements
