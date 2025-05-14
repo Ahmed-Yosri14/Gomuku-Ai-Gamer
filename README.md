@@ -56,5 +56,5 @@ After that chose The Game Mode and Board size:
 - Human vs AI (Minimax)
 - AI vs AI
 
-And **finally** tell us , Can you **beat** out game :>
+And **finally** tell us , Can you **beat** our game :>
 
