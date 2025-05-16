@@ -20,14 +20,13 @@ class AlphaBeta:
             "FIVE": 100000000,
             "OPEN_FOUR": 10000000
         }
-        self.first_move = True  # Track if this is the first move
+        self.first_move = True
 
     # for hashing
     def board_to_key(self, board):
         return ''.join(''.join(row) for row in board.grid)
 
     def FindBestMove(self, board, player) -> Tuple[int, int]:
-        # If this is the first move, play in the middle
         if self.first_move and all(board.grid[i][j] == '.' for i in range(board.l) for j in range(board.l)):
             self.first_move = False
             middle = board.l // 2
@@ -137,7 +136,6 @@ class AlphaBeta:
     def get_relevant_moves(self, board):
         moves = set()
 
-        # First priority: immediate wins or blocks
         for i in range(board.l):
             for j in range(board.l):
                 if board.grid[i][j] == '.':
@@ -148,11 +146,9 @@ class AlphaBeta:
                             return [(i, j)]  # Return immediately for critical moves
                         board.grid[i][j] = '.'
 
-        # Second priority: moves near existing pieces (but more focused)
         for i in range(board.l):
             for j in range(board.l):
                 if board.grid[i][j] != '.':
-                    # Only check adjacent squares (reduced from 5x5 to 3x3 area)
                     for di in [-1, 0, 1]:
                         for dj in [-1, 0, 1]:
                             if di == 0 and dj == 0:

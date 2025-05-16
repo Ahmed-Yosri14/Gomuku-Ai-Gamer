@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import messagebox
-
 from Core.board import Board
 from Core.player import HumanPlayer, AIPlayer
 from Core.game_engine import GameEngine
@@ -10,14 +9,13 @@ from Ai.alphabeta import AlphaBeta
 STONE_RADIUS_RATIO = 0.40
 SYMBOL_TO_COLOR    = {"X": "black", "O": "white"}
 SYMBOL_TO_NAME     = {"X": "Black", "O": "White"}
-
 DARK_BG    = "#1e1e1e"
 BOARD_BG   = "#262626"
 GRID_COLOR = "#555555"
 LABEL_FG   = "#e0e0e0"
 LABEL_BG   = DARK_BG
 def center_window(win, w=None, h=None):
-    win.update_idletasks()                      # get correct geometry
+    win.update_idletasks()
     if w is None or h is None:
         w = win.winfo_width()
         h = win.winfo_height()
@@ -60,7 +58,7 @@ class GomokuGUI:
             p1 = HumanPlayer(names[0], "X")
             p2 = AIPlayer("AI Bot", "O", minimax_move)
         else:
-            p1 = AIPlayer("AI X", "X", minimax_move)
+            p1 = AIPlayer("AI X", "X", alphabeta_move)
             p2 = AIPlayer("AI O", "O", alphabeta_move)
 
         self.engine = GameEngine(board, p1, p2)
